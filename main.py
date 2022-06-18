@@ -4,11 +4,11 @@ import pandas as pd
 import pathlib
 import os
 
-from split_dataset import create_subdirectories
+from split_dataset import split_dataset
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 if __name__ == '__main__':
-    create_subdirectories()
+    split_dataset()
     print("ok")
 
