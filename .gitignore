@@ -130,3 +130,9 @@ dmypy.json
 
 # Pycharm
 .idea/
+
+# Dataset
+data/images/*
+data/dataset/test/*
+data/dataset/train/*
+data/dataset/validate/*
