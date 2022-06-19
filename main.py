@@ -1,9 +1,7 @@
 import os
 
 from split_dataset import split_dataset
-from cnn import create_dataset
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+from cnn import build_cnn
 
 
 def main() -> int:
@@ -13,7 +11,7 @@ def main() -> int:
         return 0
 
     print("Dataset split correctly")
-    create_dataset()
+    build_cnn()
 
 
 if __name__ == '__main__':

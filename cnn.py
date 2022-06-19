@@ -1,4 +1,3 @@
-import numpy as np
 import os
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -11,7 +10,7 @@ IMG_WIDTH: int = 180
 EPOCHS: int = 10
 
 
-def create_dataset() -> None:
+def build_cnn() -> None:
     train_dataset = tf.keras.utils.image_dataset_from_directory(
         os.path.join(DATASET_PATH, "train"),
         seed=123,
@@ -24,6 +23,7 @@ def create_dataset() -> None:
         image_size=(IMG_HEIGHT, IMG_WIDTH),
         batch_size=BATCH_SIZE)
 
+    classes_number = len(train_dataset.class_names)
     autotune = tf.data.AUTOTUNE
 
     train_dataset = train_dataset.cache().shuffle(1000).prefetch(buffer_size=autotune)
@@ -31,8 +31,6 @@ def create_dataset() -> None:
 
     normalization_layer = tf.keras.layers.Rescaling(1. / 255)
     train_dataset.map(lambda x, y: (normalization_layer(x), y))
-
-    num_classes = 100
 
     cnn = tf.keras.Sequential()
     cnn.add(tf.keras.layers.Rescaling(1. / 255, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)))
@@ -47,7 +45,7 @@ def create_dataset() -> None:
 
     cnn.add(tf.keras.layers.Flatten())
     cnn.add(tf.keras.layers.Dense(units=128, activation='relu'))
-    cnn.add(tf.keras.layers.Dense(num_classes))
+    cnn.add(tf.keras.layers.Dense(classes_number))
 
     cnn.compile(optimizer='adam',
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -55,5 +53,28 @@ def create_dataset() -> None:
 
     cnn.summary()
 
-    cnn.fit(train_dataset, validation_data=validation_dataset, epochs=EPOCHS)
+    result = cnn.fit(train_dataset, validation_data=validation_dataset, epochs=EPOCHS)
+
+    # Visualize the training results
+    accuracy = result.history['accuracy']
+    validation_accuracy = result.history['val_accuracy']
+
+    loss = result.history['loss']
+    validation_loss = result.history['val_loss']
+
+    epochs_range = range(EPOCHS)
+
+    plt.figure(figsize=(8, 8))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_range, accuracy, label='Training Accuracy')
+    plt.plot(epochs_range, validation_accuracy, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, validation_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.show()
 
