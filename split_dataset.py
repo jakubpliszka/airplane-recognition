@@ -31,7 +31,7 @@ def create_subdirectories() -> None:
             os.mkdir(os.path.join(validate_dir, variant))
 
 
-def read_images_indexes(file_name : str) -> list:
+def read_images_indexes(file_name: str) -> list:
     indexes = []
     indexes_split = []
     with open(os.path.join(INFO_PATH, file_name)) as infile:
@@ -45,7 +45,7 @@ def read_images_indexes(file_name : str) -> list:
     return indexes_split
 
 
-def move_images(indexes : list, set_type : str) -> bool:
+def move_images(indexes: list, set_type: str) -> bool:
     for index in indexes:
         try:
             image_path = os.path.join(IMAGES_PATH, index[0] + ".jpg")
@@ -60,11 +60,26 @@ def move_images(indexes : list, set_type : str) -> bool:
     return True
 
 
-def split_dataset():
+def split_dataset() -> bool:
     create_subdirectories()
+
     indexes_train = read_images_indexes("images_variant_train.txt")
     indexes_test = read_images_indexes("images_variant_test.txt")
     indexes_validate = read_images_indexes("images_variant_validate.txt")
-    move_images(indexes_train, "train")
-    move_images(indexes_test, "test")
-    move_images(indexes_validate, "validate")
+
+    success = True
+    while True:
+        success = move_images(indexes_train, "train")
+        if not success:
+            break
+
+        success = move_images(indexes_test, "test")
+        if not success:
+            break
+
+        success = move_images(indexes_validate, "validate")
+        break
+
+    return success
+
+
