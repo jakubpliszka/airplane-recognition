@@ -4,9 +4,10 @@ import tensorflow as tf
 
 from split_dataset import DATASET_PATH
 
+
 BATCH_SIZE: int = 32
-IMG_HEIGHT: int = 180
-IMG_WIDTH: int = 180
+IMG_HEIGHT: int = 128
+IMG_WIDTH: int = 128
 EPOCHS: int = 10
 
 
@@ -29,11 +30,16 @@ def build_cnn() -> None:
     train_dataset = train_dataset.cache().shuffle(1000).prefetch(buffer_size=autotune)
     validation_dataset = validation_dataset.cache().prefetch(buffer_size=autotune)
 
-    normalization_layer = tf.keras.layers.Rescaling(1. / 255)
-    train_dataset.map(lambda x, y: (normalization_layer(x), y))
+    # Data augmentation for overfitting (did not work)
+    # data_augmentation = tf.keras.Sequential()
+    # data_augmentation.add(tf.keras.layers.RandomFlip("horizontal", input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)))
+    # data_augmentation.add(tf.keras.layers.RandomRotation(0.1))
+    # data_augmentation.add(tf.keras.layers.RandomZoom(0.1))
 
     cnn = tf.keras.Sequential()
     cnn.add(tf.keras.layers.Rescaling(1. / 255, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)))
+    # cnn.add(data_augmentation) (did not work)
+
     cnn.add(tf.keras.layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu'))
     cnn.add(tf.keras.layers.MaxPooling2D())
 
@@ -43,6 +49,7 @@ def build_cnn() -> None:
     cnn.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
     cnn.add(tf.keras.layers.MaxPooling2D())
 
+    cnn.add(tf.keras.layers.Dropout(0.4))
     cnn.add(tf.keras.layers.Flatten())
     cnn.add(tf.keras.layers.Dense(units=128, activation='relu'))
     cnn.add(tf.keras.layers.Dense(classes_number))
