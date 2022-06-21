@@ -8,7 +8,7 @@ from split_dataset import DATASET_PATH
 BATCH_SIZE: int = 32
 IMG_HEIGHT: int = 128
 IMG_WIDTH: int = 128
-EPOCHS: int = 10
+EPOCHS: int = 15
 
 
 def build_cnn() -> None:
@@ -24,7 +24,7 @@ def build_cnn() -> None:
         image_size=(IMG_HEIGHT, IMG_WIDTH),
         batch_size=BATCH_SIZE)
 
-    classes_number = len(train_dataset.class_names)
+    number_of_classes = len(train_dataset.class_names)
     autotune = tf.data.AUTOTUNE
 
     train_dataset = train_dataset.cache().shuffle(1000).prefetch(buffer_size=autotune)
@@ -38,21 +38,21 @@ def build_cnn() -> None:
 
     cnn = tf.keras.Sequential()
     cnn.add(tf.keras.layers.Rescaling(1. / 255, input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)))
-    # cnn.add(data_augmentation) (did not work)
+    # cnn.add(data_augmentation)
 
     cnn.add(tf.keras.layers.Conv2D(filters=16, kernel_size=3, padding='same', activation='relu'))
-    cnn.add(tf.keras.layers.MaxPooling2D())
+    cnn.add(tf.keras.layers.MaxPooling2D(2))
 
     cnn.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
-    cnn.add(tf.keras.layers.MaxPooling2D())
+    cnn.add(tf.keras.layers.MaxPooling2D(2))
 
     cnn.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
-    cnn.add(tf.keras.layers.MaxPooling2D())
+    cnn.add(tf.keras.layers.MaxPooling2D(2))
 
     cnn.add(tf.keras.layers.Dropout(0.4))
     cnn.add(tf.keras.layers.Flatten())
     cnn.add(tf.keras.layers.Dense(units=128, activation='relu'))
-    cnn.add(tf.keras.layers.Dense(classes_number))
+    cnn.add(tf.keras.layers.Dense(number_of_classes))
 
     cnn.compile(optimizer='adam',
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
