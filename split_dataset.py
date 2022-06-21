@@ -1,6 +1,5 @@
 import os
 
-
 DATA_PATH: str = os.path.join(os.getcwd(), "data")
 IMAGES_PATH: str = os.path.join(DATA_PATH, "images")
 INFO_PATH: str = os.path.join(DATA_PATH, "info")
@@ -50,9 +49,9 @@ def move_images(train_entries: list, test_entries: list, validate_entries: list)
     f"""
     For each entry type move the images associated with indexes in the entries. For 'test' and 'validation' it takes
     {TEST_AND_VALIDATE_CLASS_SIZE} images for each class and the rest is moved to 'train'.
-    :param train_entries:
-    :param test_entries:
-    :param validate_entries:
+    :param train_entries: List of the images indexes for training.
+    :param test_entries: List of the images indexes for testing.
+    :param validate_entries: List of the images indexes for validation.
     :return: True if all files were moved correctly, False otherwise.
     """
     for entry in train_entries:
@@ -104,7 +103,8 @@ def move_single_image(index: str, class_name: str, set_type: str) -> bool:
         # Check if the image is already moved
         if not os.path.exists(target_path):
             return False
-        # else do nothing, file is already moved
+        else:
+            return True  # File is already moved
 
 
 def split_dataset() -> bool:
@@ -117,5 +117,3 @@ def split_dataset() -> bool:
     success = move_images(indexes_train, indexes_test, indexes_validate)
 
     return success
-
-
