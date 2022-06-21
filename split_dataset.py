@@ -1,12 +1,13 @@
 import os
 
 
-DATA_PATH = os.path.join(os.getcwd(), "data")
-IMAGES_PATH = os.path.join(DATA_PATH, "images")
-INFO_PATH = os.path.join(DATA_PATH, "info")
-DATASET_PATH = os.path.join(DATA_PATH, "dataset")
+DATA_PATH: str = os.path.join(os.getcwd(), "data")
+IMAGES_PATH: str = os.path.join(DATA_PATH, "images")
+INFO_PATH: str = os.path.join(DATA_PATH, "info")
+DATASET_PATH: str = os.path.join(DATA_PATH, "dataset")
 
-VARIANTS_FILE_NAME = "variants.txt"
+VARIANTS_FILE_NAME: str = "variants.txt"
+TEST_AND_VALIDATE_CLASS_SIZE: int = 15
 
 
 def create_subdirectories() -> None:
@@ -45,19 +46,65 @@ def read_images_indexes(file_name: str) -> list:
     return indexes_split
 
 
-def move_images(indexes: list, set_type: str) -> bool:
-    for index in indexes:
-        try:
-            image_path = os.path.join(IMAGES_PATH, index[0] + ".jpg")
-            target_path = os.path.join(os.path.join(os.path.join(DATASET_PATH, set_type), index[1]), index[0] + ".jpg")
-            os.rename(image_path, target_path)
-        except FileNotFoundError:
-            # Check if the image is already moved
-            if not os.path.exists(target_path):
+def move_images(train_entries: list, test_entries: list, validate_entries: list) -> bool:
+    f"""
+    For each entry type move the images associated with indexes in the entries. For 'test' and 'validation' it takes
+    {TEST_AND_VALIDATE_CLASS_SIZE} images for each class and the rest is moved to 'train'.
+    :param train_entries:
+    :param test_entries:
+    :param validate_entries:
+    :return: True if all files were moved correctly, False otherwise.
+    """
+    for entry in train_entries:
+        if not move_single_image(entry[0], entry[1], "train"):
+            return False
+
+    counter = 0
+    previous_class_name = test_entries[0][1]
+    for entry in test_entries:
+        if entry[1] == previous_class_name:
+            counter += 1
+        else:
+            counter = 1
+            previous_class_name = entry[1]
+
+        if counter <= TEST_AND_VALIDATE_CLASS_SIZE:
+            if not move_single_image(entry[0], entry[1], "test"):
                 return False
-            # else do nothing, file is already moved
+        else:
+            if not move_single_image(entry[0], entry[1], "train"):
+                return False
+
+    counter = 0
+    previous_class_name = validate_entries[0][1]
+    for entry in validate_entries:
+        if entry[1] == previous_class_name:
+            counter += 1
+        else:
+            counter = 1
+            previous_class_name = entry[1]
+
+        if counter <= TEST_AND_VALIDATE_CLASS_SIZE:
+            if not move_single_image(entry[0], entry[1], "validate"):
+                return False
+        else:
+            if not move_single_image(entry[0], entry[1], "train"):
+                return False
 
     return True
+
+
+def move_single_image(index: str, class_name: str, set_type: str) -> bool:
+    try:
+        image_path = os.path.join(IMAGES_PATH, index + ".jpg")
+        target_path = os.path.join(os.path.join(os.path.join(DATASET_PATH, set_type), class_name), index + ".jpg")
+        os.rename(image_path, target_path)
+        return True
+    except FileNotFoundError:
+        # Check if the image is already moved
+        if not os.path.exists(target_path):
+            return False
+        # else do nothing, file is already moved
 
 
 def split_dataset() -> bool:
@@ -67,18 +114,7 @@ def split_dataset() -> bool:
     indexes_test = read_images_indexes("images_variant_test.txt")
     indexes_validate = read_images_indexes("images_variant_validate.txt")
 
-    success = True
-    while True:
-        success = move_images(indexes_train, "train")
-        if not success:
-            break
-
-        success = move_images(indexes_test, "test")
-        if not success:
-            break
-
-        success = move_images(indexes_validate, "validate")
-        break
+    success = move_images(indexes_train, indexes_test, indexes_validate)
 
     return success
 
