@@ -1,5 +1,3 @@
-import os
-
 from split_dataset import split_dataset
 from cnn import build_cnn
 

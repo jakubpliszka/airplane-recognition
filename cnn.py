@@ -12,6 +12,10 @@ EPOCHS: int = 15
 
 
 def build_cnn() -> None:
+    """
+    Creates dataset, builds and trains the model, visualizes the results of the training.
+    :return: None
+    """
     train_dataset = tf.keras.utils.image_dataset_from_directory(
         os.path.join(DATASET_PATH, "train"),
         seed=123,
