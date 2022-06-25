@@ -81,6 +81,40 @@ def build_cnn() -> tf.keras.Sequential:
     return model
 
 
+def build_AlexNet() -> tf.keras.Sequential:
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Conv2D(96, kernel_size=(11, 11), strides=4, padding='valid', activation='relu',
+                                     input_shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH), kernel_initializer='he_normal'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid'))
+
+    model.add(tf.keras.layers.Conv2D(256, kernel_size=(5, 5), strides=1, padding='same', activation='relu',
+                                     kernel_initializer='he_normal'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format=None))
+
+    model.add(tf.keras.layers.Conv2D(384, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
+                                     kernel_initializer='he_normal'))
+
+    model.add(tf.keras.layers.Conv2D(384, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
+                                     kernel_initializer='he_normal'))
+
+    model.add(tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
+                                     kernel_initializer='he_normal'))
+
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format=None))
+
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(4096, activation='relu'))
+    model.add(tf.keras.layers.Dense(4096, activation='relu'))
+    model.add(tf.keras.layers.Dense(1000, activation='relu'))
+    model.add(tf.keras.layers.Dense(NUMBER_OF_CLASSES, activation='softmax'))
+
+    model.compile(optimizer=tf.keras.optimizers.Adam(),
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    return model
+
+
 def data_augmentation() -> tf.keras.Sequential:
     """
 
