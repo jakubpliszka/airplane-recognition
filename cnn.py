@@ -6,8 +6,8 @@ import tensorflow as tf
 from split_dataset import DATASET_PATH
 
 BATCH_SIZE: int = 32
-IMG_HEIGHT: int = 128
-IMG_WIDTH: int = 128
+IMG_HEIGHT: int = 224
+IMG_WIDTH: int = 224
 IMG_DEPTH: int = 3
 EPOCHS: int = 40
 
@@ -41,7 +41,7 @@ def build_and_train_model() -> tf.keras.Sequential:
     validation_dataset = validation_dataset.cache().prefetch(buffer_size=autotune)
 
     # Build model
-    cnn = build_cnn()
+    cnn = build_EfficientNetB0()
     cnn.summary()
 
     # Train model
@@ -81,7 +81,27 @@ def build_cnn() -> tf.keras.Sequential:
     return model
 
 
+def build_EfficientNetB0() -> tf.keras.Sequential:
+    """
+
+    :return:
+    """
+    input_layers = tf.keras.Input(shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH))
+    data_augmentation_layer = data_augmentation()
+    output_layers = tf.keras.applications.EfficientNetB0(
+        include_top=True, weights=None, classes=NUMBER_OF_CLASSES)(data_augmentation_layer(input_layers))
+
+    model = tf.keras.Model(inputs=input_layers, outputs=output_layers)
+    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    return model
+
+
 def build_AlexNet() -> tf.keras.Sequential:
+    """
+
+    :return:
+    """
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.Conv2D(96, kernel_size=(11, 11), strides=4, padding='valid', activation='relu',
                                      input_shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH), kernel_initializer='he_normal'))
