@@ -17,8 +17,8 @@ class_names: list = []
 
 def build_and_train_model() -> tf.keras.Sequential:
     """
-
-    :return:
+    Creates train and validation datasets, creates the model object and trains it.
+    :return: Trained model of the CNN.
     """
     global class_names
 
@@ -50,11 +50,13 @@ def build_and_train_model() -> tf.keras.Sequential:
     # Visualize the training results
     visualize_training_results(results)
 
+    return cnn
+
 
 def build_cnn() -> tf.keras.Sequential:
     """
     Creates the CNN architecture.
-    :return: PCompiled model of the CNN.
+    :return: Compiled model of the CNN.
     """
     model = tf.keras.Sequential()
 
@@ -83,8 +85,8 @@ def build_cnn() -> tf.keras.Sequential:
 
 def build_EfficientNetB0() -> tf.keras.Sequential:
     """
-
-    :return:
+    Creates the EfficientNetB0 model with data augmentation.
+    :return: Compiled model of the CNN.
     """
     input_layers = tf.keras.Input(shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH))
     data_augmentation_layer = data_augmentation()
@@ -99,8 +101,8 @@ def build_EfficientNetB0() -> tf.keras.Sequential:
 
 def build_AlexNet() -> tf.keras.Sequential:
     """
-
-    :return:
+    Creates the AlexNet model.
+    :return: Compiled model of the CNN.
     """
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.Conv2D(96, kernel_size=(11, 11), strides=4, padding='valid', activation='relu',
@@ -137,8 +139,8 @@ def build_AlexNet() -> tf.keras.Sequential:
 
 def data_augmentation() -> tf.keras.Sequential:
     """
-
-    :return:
+    Creates a data augmentation layer.
+    :return: Data augmentation layer.
     """
     data_augmentation_layer = tf.keras.Sequential()
     data_augmentation_layer.add(tf.keras.layers.RandomFlip('horizontal',
