@@ -9,8 +9,9 @@ BATCH_SIZE: int = 32
 IMG_HEIGHT: int = 224
 IMG_WIDTH: int = 224
 IMG_DEPTH: int = 3
-EPOCHS: int = 40
+EPOCHS: int = 10
 
+NUMBER_OF_CLASSES_IMAGENET: int = 1000
 NUMBER_OF_CLASSES: int = 100
 class_names: list = []
 
@@ -91,7 +92,7 @@ def build_EfficientNetB0() -> tf.keras.Sequential:
     input_layers = tf.keras.Input(shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH))
     data_augmentation_layer = data_augmentation()
     output_layers = tf.keras.applications.EfficientNetB0(
-        include_top=True, weights=None, classes=NUMBER_OF_CLASSES)(data_augmentation_layer(input_layers))
+        include_top=True, weights='imagenet', classes=NUMBER_OF_CLASSES_IMAGENET)(data_augmentation_layer(input_layers))
 
     model = tf.keras.Model(inputs=input_layers, outputs=output_layers)
     model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])

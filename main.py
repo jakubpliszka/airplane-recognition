@@ -10,7 +10,10 @@ def main() -> int:
 
     print("Dataset split correctly")
     cnn = build_and_train_model()
-    make_single_prediction("1055151.jpg", cnn)
+
+    while True:
+        file_name = input('Provide file name to be predicted: ')
+        make_single_prediction(file_name, cnn)
 
 
 if __name__ == '__main__':
