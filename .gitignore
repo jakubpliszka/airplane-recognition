@@ -133,6 +133,9 @@ dmypy.json
 
 # Dataset
 data/images/*
-data/dataset/test/*
 data/dataset/train/*
 data/dataset/validate/*
+
+!data/images/.gitkeep
+!data/dataset/train/.gitkeep
+!data/dataset/validate/.gitkeep
