@@ -13,6 +13,8 @@ common architectures such as AlexNet, EfficientNet, and MobileNet.
 
 * Results of the first CNN (v0.1)
 
+![](misc/first_cnn.png)
+
 * Results of the modified CNN (v0.2)
 
 ![](misc/modified_cnn.png)
@@ -20,7 +22,6 @@ common architectures such as AlexNet, EfficientNet, and MobileNet.
 * Results of the EfficientNetB0 with imagenet weights
 
 ![](misc/pretrained_efficientnetb0.png)
-
 
 ## Summary
 
