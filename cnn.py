@@ -38,7 +38,8 @@ def build_and_train_model() -> tf.keras.Sequential:
     class_names = train_dataset.class_names
 
     autotune = tf.data.AUTOTUNE
-    train_dataset = train_dataset.cache().shuffle(1000).prefetch(buffer_size=autotune)
+    train_dataset = train_dataset.cache().shuffle(
+        1000).prefetch(buffer_size=autotune)
     validation_dataset = validation_dataset.cache().prefetch(buffer_size=autotune)
 
     # Build model
@@ -46,7 +47,8 @@ def build_and_train_model() -> tf.keras.Sequential:
     cnn.summary()
 
     # Train model
-    results = cnn.fit(train_dataset, validation_data=validation_dataset, epochs=EPOCHS)
+    results = cnn.fit(
+        train_dataset, validation_data=validation_dataset, epochs=EPOCHS)
 
     # Visualize the training results
     visualize_training_results(results)
@@ -59,27 +61,65 @@ def build_cnn() -> tf.keras.Sequential:
     Creates the CNN architecture.
     :return: Compiled model of the CNN.
     """
+    # Define the sequential model
     model = tf.keras.Sequential()
 
-    model.add(tf.keras.layers.Rescaling(1. / 255, input_shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH)))
+    # Preprocessing step to rescale the pixel values to [0,1] and apply data augmentation
+    model.add(tf.keras.layers.Rescaling(
+        1. / 255, input_shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH)))
     model.add(data_augmentation())
 
-    model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=3, padding='same', activation='relu'))
+    # Add a convolutional layer with 32 filters, kernel size of 3x3, and same padding
+    model.add(tf.keras.layers.Conv2D(
+        filters=32, kernel_size=3, padding='same'))
+    # Add batch normalization to help with regularization and convergence
+    model.add(tf.keras.layers.BatchNormalization())
+    # Add ReLU activation to introduce non-linearity
+    model.add(tf.keras.layers.Activation('relu'))
+    # Add max pooling layer with a pool size of 2x2
     model.add(tf.keras.layers.MaxPooling2D(2))
 
-    model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=3, padding='same', activation='relu'))
+    model.add(tf.keras.layers.Conv2D(
+        filters=64, kernel_size=5, padding='same'))
+    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.Activation('relu'))
     model.add(tf.keras.layers.MaxPooling2D(2))
 
-    model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=3, padding='same', activation='relu'))
+    model.add(tf.keras.layers.Conv2D(
+        filters=128, kernel_size=3, padding='same'))
+    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.Activation('relu'))
     model.add(tf.keras.layers.MaxPooling2D(2))
 
-    model.add(tf.keras.layers.Dropout(0.4))
-    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Conv2D(
+        filters=256, kernel_size=3, padding='same'))
+    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.MaxPooling2D(2))
+
+    # Add dropout layer with a rate of 0.5 to randomly drop out 50% of the connections
+    model.add(tf.keras.layers.Dropout(0.5))
+    # Apply global average pooling to reduce the number of parameters and encourage spatial generalization
+    model.add(tf.keras.layers.GlobalAveragePooling2D())
+
+    # Add a fully connected layer with 256 units and ReLU activation
     model.add(tf.keras.layers.Dense(units=256, activation='relu'))
+    # Add dropout layer with a rate of 0.5 to randomly drop out 50% of the connections
+    model.add(tf.keras.layers.Dropout(0.5))
+    # Add a fully connected output layer with the number of classes as units
     model.add(tf.keras.layers.Dense(units=NUMBER_OF_CLASSES))
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(),
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+    # Define the learning rate schedule as an exponential decay
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+        initial_learning_rate=1e-3,
+        decay_steps=10000,
+        decay_rate=0.9)
+    # Use Adam optimizer with the learning rate schedule
+    optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+
+    # Compile the model with sparse categorical cross-entropy loss and accuracy metric
+    model.compile(optimizer=optimizer, loss=tf.keras.losses.SparseCategoricalCrossentropy(
+        from_logits=True), metrics=['accuracy'])
 
     return model
 
@@ -95,7 +135,8 @@ def build_EfficientNetB0() -> tf.keras.Sequential:
         include_top=True, weights='imagenet', classes=NUMBER_OF_CLASSES_IMAGENET)(data_augmentation_layer(input_layers))
 
     model = tf.keras.Model(inputs=input_layers, outputs=output_layers)
-    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer="adam",
+                  loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
     return model
 
@@ -108,11 +149,13 @@ def build_AlexNet() -> tf.keras.Sequential:
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.Conv2D(96, kernel_size=(11, 11), strides=4, padding='valid', activation='relu',
                                      input_shape=(IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH), kernel_initializer='he_normal'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid'))
+    model.add(tf.keras.layers.MaxPooling2D(
+        pool_size=(3, 3), strides=(2, 2), padding='valid'))
 
     model.add(tf.keras.layers.Conv2D(256, kernel_size=(5, 5), strides=1, padding='same', activation='relu',
                                      kernel_initializer='he_normal'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format=None))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3),
+              strides=(2, 2), padding='valid', data_format=None))
 
     model.add(tf.keras.layers.Conv2D(384, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
                                      kernel_initializer='he_normal'))
@@ -123,7 +166,8 @@ def build_AlexNet() -> tf.keras.Sequential:
     model.add(tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=1, padding='same', activation='relu',
                                      kernel_initializer='he_normal'))
 
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='valid', data_format=None))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3),
+              strides=(2, 2), padding='valid', data_format=None))
 
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(4096, activation='relu'))
@@ -188,7 +232,8 @@ def make_single_prediction(image_path: str, cnn: tf.keras.Sequential) -> None:
     :param cnn: Model of the trained CNN.
     :return: None
     """
-    test_image = tf.keras.utils.load_img(image_path, target_size=(IMG_HEIGHT, IMG_WIDTH))
+    test_image = tf.keras.utils.load_img(
+        image_path, target_size=(IMG_HEIGHT, IMG_WIDTH))
     image_array = tf.keras.utils.img_to_array(test_image)
     image_array = tf.expand_dims(image_array, 0)  # Create a batch
 
@@ -197,4 +242,3 @@ def make_single_prediction(image_path: str, cnn: tf.keras.Sequential) -> None:
 
     print(f'This airplane is most likely {class_names[np.argmax(score)]}, '
           f'with a {round(100 * np.max(score))}% confidence.')
-
